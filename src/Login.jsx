@@ -29,7 +29,6 @@ const Login = () => {
     if (error) {
       alert(error.message);
     } else {
-      alert("Вы успешно вошли!");
       navigate("/dashboard"); // Перенаправляем после успешного входа
     }
   };
