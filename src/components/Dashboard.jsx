@@ -108,8 +108,7 @@ const Dashboard = () => {
         </LineChart>
       </ResponsiveContainer>
 
-        {/* Форма для изменения города */}
-        <div>
+        {/* <div>
           <input
             type="text"
             value={location}
@@ -118,7 +117,6 @@ const Dashboard = () => {
           />
         </div>
 
-        {/* Блок с погодой */}
         {weather ? (
           <div className="result">
             <h2>Погода в {weather.name}, {weather.sys.country}</h2>
@@ -130,7 +128,7 @@ const Dashboard = () => {
           </div>
         ) : (
           <p>{error ? error : "Загрузка погоды..."}</p>
-        )}
+        )} */}
     </div>
   );
 };
