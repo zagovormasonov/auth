@@ -28,7 +28,9 @@ body {
   background-color: rgb(41, 41, 41);
 }
 
-
+html {
+  background-color: rgb(41, 41, 41);
+}
 
 h1 {
   font-size: 3.2em;
