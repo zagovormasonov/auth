@@ -120,7 +120,7 @@ const Dashboard = () => {
       
       {motivationMessage && (
         <div className="motivation-message" style={{ color: "#2196F3", marginTop: "20px", padding: "30px", backgroundColor: "rgb(18 42 61)", borderRadius: "5px" }}>
-          <p>{motivationMessage}</p>
+          <p style={{color: "#2196F3"}}>{motivationMessage}</p>
         </div>
       )}
     </div>
