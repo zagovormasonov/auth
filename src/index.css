@@ -105,6 +105,36 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.task-calendar {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.task-list {
+  margin-top: 15px;
+  width: 100%;
+}
+
+.task-list h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.task-list ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.task-list li {
+  padding: 5px;
+  border: 1px solid #ddd;
+  margin-bottom: 5px;
+  border-radius: 5px;
+}
+
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
