@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -11,6 +11,7 @@ const Dashboard = () => {
   const [location, setLocation] = useState("Moscow"); // Установи свой город по умолчанию
   const [error, setError] = useState(null);
   const [loginHistory, setLoginHistory] = useState([]);
+  const [activityByDay, setActivityByDay] = useState([]);
 
 
   useEffect(() => {
@@ -23,20 +24,25 @@ const Dashboard = () => {
           .order("sign_in_at", { ascending: true });
   
         if (data) {
-          // Группируем данные по дням
-          const groupedData = data.reduce((acc, item) => {
-            const date = new Date(item.sign_in_at).toLocaleDateString();
-            acc[date] = (acc[date] || 0) + 1;
+          // Считаем количество входов по дням недели
+          const groupedByDay = data.reduce((acc, item) => {
+            const dayOfWeek = new Date(item.sign_in_at).getDay();
+            acc[dayOfWeek] = (acc[dayOfWeek] || 0) + 1;
             return acc;
           }, {});
   
-          // Преобразуем в массив для графика
-          const chartData = Object.keys(groupedData).map((date) => ({
-            date,
-            logins: groupedData[date],
-          }));
+          // Преобразуем данные для отображения на графике
+          const chartData = [
+            { day: "Воскресенье", logins: groupedByDay[0] || 0 },
+            { day: "Понедельник", logins: groupedByDay[1] || 0 },
+            { day: "Вторник", logins: groupedByDay[2] || 0 },
+            { day: "Среда", logins: groupedByDay[3] || 0 },
+            { day: "Четверг", logins: groupedByDay[4] || 0 },
+            { day: "Пятница", logins: groupedByDay[5] || 0 },
+            { day: "Суббота", logins: groupedByDay[6] || 0 },
+          ];
   
-          setLoginHistory(chartData);
+          setActivityByDay(chartData);
         }
       }
     };
@@ -100,12 +106,12 @@ const Dashboard = () => {
       <button onClick={handleLogout}>Выйти</button>
       <p>Последний вход: {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "Нет данных"}</p>
       <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={loginHistory}>
-          <XAxis dataKey="date" />
+        <BarChart data={activityByDay}>
+          <XAxis dataKey="day" />
           <YAxis />
           <Tooltip />
-          <Line type="monotone" dataKey="logins" stroke="#8884d8" strokeWidth={2} />
-        </LineChart>
+          <Bar dataKey="logins" fill="#8884d8" />
+        </BarChart>
       </ResponsiveContainer>
 
         {/* <div>
