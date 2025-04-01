@@ -51,8 +51,6 @@ const Dashboard = () => {
       <span className="profile_name">{user?.email}</span>
       <button onClick={handleLogout}>Выйти</button>
 
-      <h1>Добро пожаловать на Dashboard!</h1>
-
         {/* Форма для изменения города */}
         <div>
           <input
