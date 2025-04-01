@@ -44,9 +44,13 @@ const Dashboard = () => {
           .order("sign_in_at", { ascending: true });
   
         if (data) {
-          // Считаем количество входов по дням недели
           const groupedByDay = data.reduce((acc, item) => {
-            const dayOfWeek = new Date(item.sign_in_at).getDay();
+            // Преобразуем дату входа в объект Date
+            const signInDate = new Date(item.sign_in_at);
+            // Приводим время в UTC и получаем день недели (0 - воскресенье, 1 - понедельник, и так далее)
+            const dayOfWeek = signInDate.getUTCDay();
+            
+            // Считаем количество входов для каждого дня недели
             acc[dayOfWeek] = (acc[dayOfWeek] || 0) + 1;
             return acc;
           }, {});
@@ -69,6 +73,7 @@ const Dashboard = () => {
   
     fetchLogins();
   }, [user]);
+  
 
 
   useEffect(() => {
@@ -96,24 +101,6 @@ const Dashboard = () => {
     checkUser();
   }, [navigate]);
 
-
-  useEffect(() => {
-    const fetchWeather = async () => {
-      try {
-        const apiKey = "74e0778d44f33af174a08066b01b209a"; // Подставь свой ключ API
-        const response = await axios.get(
-          `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apiKey}&units=metric&lang=ru`
-        );
-        setWeather(response.data);
-        setError(null); // Очищаем ошибку, если запрос успешен
-      } catch (err) {
-        setError("Не удалось загрузить погоду по вашему запросу.");
-        setWeather(null);
-      }
-    };
-
-    fetchWeather();
-  }, [location]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
