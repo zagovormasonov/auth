@@ -1,22 +1,13 @@
-import { useState, useEffect } from "react";
-import { supabase } from "../supabaseClient";
-import { useNavigate, Link } from "react-router-dom";
+import { useState } from "react";
+import { supabase } from "./supabaseClient";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data, error } = await supabase.auth.getUser();
-      if (data?.user) {
-        navigate("/dashboard"); // Если пользователь авторизован, отправляем его на Dashboard
-      }
-    };
-
-    checkUser();
-  }, [navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -29,7 +20,10 @@ const Login = () => {
     if (error) {
       alert(error.message);
     } else {
-      navigate("/dashboard"); // Перенаправляем после успешного входа
+      setShowSuccess(true); // Показываем анимацию успеха
+      setTimeout(() => {
+        navigate("/dashboard"); // Через 1.5 секунды переходим на Dashboard
+      }, 1500);
     }
   };
 
@@ -53,9 +47,25 @@ const Login = () => {
         />
         <button type="submit">Войти</button>
       </form>
-      <p>
-        Нет аккаунта? <Link to="/register">Зарегистрируйтесь</Link>
-      </p>
+
+      {showSuccess && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.5 }}
+          transition={{ duration: 0.5 }}
+          style={{
+            marginTop: "20px",
+            padding: "10px",
+            background: "green",
+            color: "white",
+            borderRadius: "5px",
+            textAlign: "center",
+          }}
+        >
+          ✅ Успешный вход!
+        </motion.div>
+      )}
     </div>
   );
 };
