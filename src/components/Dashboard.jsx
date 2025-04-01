@@ -11,6 +11,19 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const updateLastLogin = async () => {
+      if (user) {
+        await supabase
+          .from("users") // Таблица пользователей в Supabase
+          .update({ last_login: new Date().toISOString() })
+          .eq("id", user.id);
+      }
+    };
+  
+    updateLastLogin();
+  }, [user]);
+
+  useEffect(() => {
     const checkUser = async () => {
       const { data, error } = await supabase.auth.getUser();
       if (!data?.user) {
@@ -50,6 +63,7 @@ const Dashboard = () => {
     <div className="layout">
       <span className="profile_name">{user?.email}</span>
       <button onClick={handleLogout}>Выйти</button>
+      <p>Последний вход: {new Date(user?.last_login).toLocaleString()}</p>
 
         {/* Форма для изменения города */}
         <div>
