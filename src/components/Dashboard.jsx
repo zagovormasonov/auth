@@ -23,7 +23,7 @@ const Dashboard = () => {
       } else {
         setMotivationMessage("Ты заходишь в систему регулярно. Молодец!");
       }
-
+      
     };
   
     analyzeActivity();
@@ -53,13 +53,13 @@ const Dashboard = () => {
   
           // Преобразуем данные для отображения на графике
           const chartData = [
-            { day: "Воскресенье", Входов: groupedByDay[0] || 0 },
-            { day: "Понедельник", Входов: groupedByDay[1] || 0 },
-            { day: "Вторник", Входов: groupedByDay[2] || 0 },
-            { day: "Среда", Входов: groupedByDay[3] || 0 },
-            { day: "Четверг", Входов: groupedByDay[4] || 0 },
-            { day: "Пятница", Входов: groupedByDay[5] || 0 },
-            { day: "Суббота", Входов: groupedByDay[6] || 0 },
+            { day: "Воскресенье", logins: groupedByDay[0] || 0 },
+            { day: "Понедельник", logins: groupedByDay[1] || 0 },
+            { day: "Вторник", logins: groupedByDay[2] || 0 },
+            { day: "Среда", logins: groupedByDay[3] || 0 },
+            { day: "Четверг", logins: groupedByDay[4] || 0 },
+            { day: "Пятница", logins: groupedByDay[5] || 0 },
+            { day: "Суббота", logins: groupedByDay[6] || 0 },
           ];
   
           setActivityByDay(chartData);
