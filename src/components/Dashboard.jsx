@@ -7,7 +7,7 @@ const Dashboard = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const [weather, setWeather] = useState(null);
-  const [location, setLocation] = useState("Moscow"); // Установи свой город по умолчанию
+  const [location, setLocation] = useState("Izhevsk"); // Установи свой город по умолчанию
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -26,7 +26,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchWeather = async () => {
       try {
-        const apiKey = "b1a0b23d9b2d47ed2f9ae2d6f3d2eb85"; // Подставь свой ключ API
+        const apiKey = "74e0778d44f33af174a08066b01b209a"; // Подставь свой ключ API
         const response = await axios.get(
           `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apiKey}&units=metric&lang=ru`
         );
