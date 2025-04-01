@@ -26,7 +26,7 @@ const Dashboard = () => {
 
   return (
     <div>
-      <h1>Привет, {user?.email}!</h1>
+      <span className="profile_name">{user?.email}</span>
       <button onClick={handleLogout}>Выйти</button>
     </div>
   );
