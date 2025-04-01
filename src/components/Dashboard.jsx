@@ -10,19 +10,7 @@ const Dashboard = () => {
   const [location, setLocation] = useState("Moscow"); // Установи свой город по умолчанию
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const updateLastLogin = async () => {
-      if (user) {
-        await supabase
-          .from("users") // Таблица пользователей в Supabase
-          .update({ last_login: new Date().toISOString() })
-          .eq("id", user.id);
-      }
-    };
   
-    updateLastLogin();
-  }, [user]);
-
   useEffect(() => {
     const checkUser = async () => {
       const { data, error } = await supabase.auth.getUser();
@@ -35,6 +23,7 @@ const Dashboard = () => {
 
     checkUser();
   }, [navigate]);
+
 
   useEffect(() => {
     const fetchWeather = async () => {
@@ -63,7 +52,7 @@ const Dashboard = () => {
     <div className="layout">
       <span className="profile_name">{user?.email}</span>
       <button onClick={handleLogout}>Выйти</button>
-      <p>Последний вход: {new Date(user?.last_login).toLocaleString()}</p>
+      <p>Последний вход: {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "Нет данных"}</p>
 
         {/* Форма для изменения города */}
         <div>
