@@ -50,6 +50,7 @@ a:hover {
   background-color: #171717;
   margin-top: 30px;
   border-radius: 20px;
+  box-shadow: 20px 50px 50px #212121;
 }
 
 .profile_name {

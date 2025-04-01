@@ -1,13 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(localStorage.getItem("savedEmail") || ""); // Берем из localStorage
   const [password, setPassword] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    localStorage.setItem("savedEmail", email); // Сохраняем email при его изменении
+  }, [email]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -20,9 +24,9 @@ const Login = () => {
     if (error) {
       alert(error.message);
     } else {
-      setShowSuccess(true); // Показываем анимацию успеха
+      setShowSuccess(true);
       setTimeout(() => {
-        navigate("/dashboard"); // Через 1.5 секунды переходим на Dashboard
+        navigate("/dashboard");
       }, 800);
     }
   };
@@ -57,11 +61,11 @@ const Login = () => {
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.5 }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: 0.3 }}
           style={{
             marginTop: "20px",
             padding: "10px",
-            background: "green",
+            background: "#25F475",
             color: "white",
             borderRadius: "5px",
             textAlign: "center",
