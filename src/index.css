@@ -27,6 +27,7 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: rgb(41, 41, 41);
 }
 
 
@@ -34,7 +35,7 @@ body {
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
-  color: black;
+  color: white;
 }
 
 h2 {
