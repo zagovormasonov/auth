@@ -34,6 +34,7 @@ h1 {
   font-size: 3.2em;
   line-height: 1.1;
   color: white;
+  transition: .3s ease;
 }
 
 h2 {
