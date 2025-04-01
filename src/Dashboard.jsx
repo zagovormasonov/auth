@@ -10,7 +10,7 @@ const Dashboard = () => {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        navigate("/login"); // Если не авторизован, перекидываем на логин
+        navigate("/login"); // Если пользователь не авторизован, перенаправляем на login
       } else {
         setUser(user);
       }
