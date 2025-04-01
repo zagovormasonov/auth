@@ -59,7 +59,6 @@ const Dashboard = () => {
             onChange={(e) => setLocation(e.target.value)}
             placeholder="Введите город"
           />
-          <button onClick={() => setLocation(location)}>Показать погоду</button>
         </div>
 
         {/* Блок с погодой */}
