@@ -33,7 +33,7 @@ const Dashboard = () => {
         setWeather(response.data);
         setError(null); // Очищаем ошибку, если запрос успешен
       } catch (err) {
-        setError("Не удалось загрузить погоду. Попробуйте позже.");
+        setError("Не удалось загрузить погоду по вашему запросу.");
         setWeather(null);
       }
     };
@@ -63,7 +63,7 @@ const Dashboard = () => {
 
         {/* Блок с погодой */}
         {weather ? (
-          <div>
+          <div className="result">
             <h2>Погода в {weather.name}, {weather.sys.country}</h2>
             <p>Температура: {weather.main.temp}°C</p>
             <p>Ощущается как: {weather.main.feels_like}°C</p>
