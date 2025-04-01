@@ -33,7 +33,7 @@ const Dashboard = () => {
     setError(null);
 
     try {
-      const apiKey = "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"; // Замените на свой ключ OpenAI
+      const apiKey = process.env.REACT_APP_OPENAI_API_KEY; // Замените на свой ключ OpenAI
       const response = await axios.post(
         "https://api.openai.com/v1/completions",
         {
