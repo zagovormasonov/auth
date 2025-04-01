@@ -8,11 +8,11 @@ const Dashboard = () => {
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      const { data, error } = await supabase.auth.getUser();
+      if (!data?.user) {
         navigate("/login"); // Если пользователь не авторизован, перенаправляем на login
       } else {
-        setUser(user);
+        setUser(data.user);
       }
     };
 

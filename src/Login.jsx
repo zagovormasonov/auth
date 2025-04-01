@@ -8,12 +8,14 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Проверяем, авторизован ли пользователь
-    const user = supabase.auth.user();
-    if (user) {
-      // Если пользователь авторизован, перенаправляем на Dashboard
-      navigate("/dashboard");
-    }
+    const checkUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data?.user) {
+        navigate("/dashboard"); // Если пользователь авторизован, отправляем его на Dashboard
+      }
+    };
+
+    checkUser();
   }, [navigate]);
 
   const handleLogin = async (e) => {
@@ -28,7 +30,7 @@ const Login = () => {
       alert(error.message);
     } else {
       alert("Вы успешно вошли!");
-      navigate("/dashboard"); // Перенаправляем на Dashboard после входа
+      navigate("/dashboard"); // Перенаправляем после успешного входа
     }
   };
 
