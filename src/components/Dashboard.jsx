@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import TaskCalendar from "./TaskCalendar";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -117,6 +117,8 @@ const Dashboard = () => {
           <Bar dataKey="logins" fill="#8884d8" />
         </BarChart>
       </ResponsiveContainer>
+
+      <TaskCalendar />
       
       {motivationMessage && (
         <div className="motivation-message" style={{ color: "#2196F3", marginTop: "20px", padding: "30px", backgroundColor: "rgb(18 42 61)", borderRadius: "5px" }}>
