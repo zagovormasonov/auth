@@ -1,18 +1,37 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { motion } from "framer-motion";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
-  const [weather, setWeather] = useState(null);
-  const [location, setLocation] = useState("Moscow"); // Установи свой город по умолчанию
-  const [error, setError] = useState(null);
-  const [loginHistory, setLoginHistory] = useState([]);
   const [activityByDay, setActivityByDay] = useState([]);
   const [motivationMessage, setMotivationMessage] = useState("");
+  const [notifications, setNotifications] = useState([]);
+
+
+  useEffect(() => {
+    // Функция для получения уведомлений пользователя
+    const fetchNotifications = async () => {
+      const { data, error } = await supabase
+        .from("notifications")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (data) {
+        setNotifications(data);
+      } else if (error) {
+        console.error("Ошибка получения уведомлений:", error);
+      }
+    };
+
+    if (user) {
+      fetchNotifications();
+    }
+  }, [user]);
 
 
   useEffect(() => {
@@ -127,6 +146,18 @@ const Dashboard = () => {
           <p>{motivationMessage}</p>
         </div>
       )}
+      
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="notification-item"
+      >
+        <p>{notification.message}</p>
+        <small>{new Date(notification.created_at).toLocaleString()}</small>
+      </motion.div>
+
     </div>
   );
 };
