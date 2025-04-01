@@ -105,7 +105,7 @@ const Dashboard = () => {
       <span className="profile_name">{user?.email}</span>
       <button onClick={handleLogout}>Выйти</button>
       <p>Последний вход: {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "Нет данных"}</p>
-      <ResponsiveContainer width="100%" height={300}>
+      <ResponsiveContainer width="500px" height={300}>
         <BarChart data={activityByDay}>
           <XAxis dataKey="day" />
           <YAxis />
