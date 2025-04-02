@@ -44,10 +44,10 @@ const Login = () => {
   };
 
   return (
-    <div style={{ position: "relative" }}>
+    <div>
       <h2>Вход</h2>
       <form onSubmit={handleLogin}>
-        <div style={{ position: "relative" }}>
+        <div>
           <input
             type="email"
             value={email}
