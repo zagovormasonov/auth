@@ -215,9 +215,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      <button className="addButton" onClick={() => setShowModal(true)}>
-        Добавить
-      </button>
+      <button className="addButton" onClick={() => setShowModal(true)}></button>
 
       {/* Модальное окно */}
       {showModal && (
