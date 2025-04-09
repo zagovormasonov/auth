@@ -123,8 +123,8 @@ const Dashboard = () => {
           <p style={{color: "#2196F3"}}>{motivationMessage}</p>
         </div>
       )}
-      <div className="addButton" onClick={createNewTask()}>
-        
+      <div className="addButton">
+
       </div>
     </div>
   );
