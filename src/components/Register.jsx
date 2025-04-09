@@ -26,7 +26,7 @@ const Register = () => {
   return (
     <div className="wrapper">
       <h1>Viremo</h1>
-      <h2>Регистрация</h2>
+      <h2 className="text-4xl font-bold flex-1/4 text-blue-500">Регистрация</h2>
       <form onSubmit={handleRegister}>
         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Пароль" required />
