@@ -173,9 +173,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      <div className="addButton" style={{ marginTop: "20px" }}>
-        <button onClick={() => setShowModal(true)}>Добавить</button>
-      </div>
+        <button className="addButton" onClick={() => setShowModal(true)}></button>
 
       {/* Модальное окно */}
       {showModal && (
@@ -189,7 +187,7 @@ const Dashboard = () => {
           alignItems: "center"
         }}>
           <div style={{
-            backgroundColor: "#fff",
+            backgroundColor: "black",
             padding: "20px",
             borderRadius: "8px",
             width: "300px",
@@ -222,7 +220,7 @@ const Dashboard = () => {
         <div className="task-list" style={{ marginTop: "30px" }}>
           <h3 style={{ marginBottom: "10px" }}>Твои задания:</h3>
           {tasks.map((task) => (
-            <div key={task.id} style={{ backgroundColor: "#f2f2f2", padding: "10px", marginBottom: "10px", borderRadius: "5px" }}>
+            <div key={task.id} style={{ backgroundColor: "black", padding: "10px", marginBottom: "10px", borderRadius: "5px" }}>
               <strong>{task.title}</strong>
               <p>{task.description}</p>
               <small style={{ color: "#777" }}>
