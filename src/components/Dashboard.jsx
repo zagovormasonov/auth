@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 import { useNavigate } from "react-router-dom";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -14,6 +21,7 @@ const Dashboard = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
+  const [editingTask, setEditingTask] = useState(null);
   const [tasks, setTasks] = useState([]);
 
   useEffect(() => {
@@ -37,7 +45,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchLogins = async () => {
       if (user) {
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from("logins")
           .select("sign_in_at")
           .eq("user_id", user.id)
@@ -92,7 +100,6 @@ const Dashboard = () => {
     checkUser();
   }, [navigate]);
 
-  // Загрузка задач из Supabase
   const fetchTasks = async () => {
     if (user) {
       const { data, error } = await supabase
@@ -101,9 +108,7 @@ const Dashboard = () => {
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("Ошибка при получении задач:", error.message);
-      } else {
+      if (!error) {
         setTasks(data);
       }
     }
@@ -121,30 +126,67 @@ const Dashboard = () => {
       return;
     }
 
-    const { error } = await supabase.from("tasks").insert([
-      {
-        user_id: user.id,
-        title,
-        description,
-      },
-    ]);
+    if (editingTask) {
+      // Обновление задачи
+      const { error } = await supabase
+        .from("tasks")
+        .update({ title, description })
+        .eq("id", editingTask.id);
 
-    if (error) {
-      console.error("Ошибка при сохранении:", error.message);
-      alert("Ошибка при сохранении");
+      if (error) {
+        alert("Ошибка при редактировании");
+      } else {
+        alert("Задание обновлено!");
+      }
     } else {
-      alert("Задание успешно добавлено!");
-      setShowModal(false);
-      setTitle("");
-      setDescription("");
-      fetchTasks(); // Подгружаем задачи снова
+      // Добавление новой задачи
+      const { error } = await supabase.from("tasks").insert([
+        {
+          user_id: user.id,
+          title,
+          description,
+        },
+      ]);
+
+      if (error) {
+        alert("Ошибка при сохранении");
+      } else {
+        alert("Задание успешно добавлено!");
+      }
     }
+
+    setShowModal(false);
+    setTitle("");
+    setDescription("");
+    setEditingTask(null);
+    fetchTasks();
   };
 
   const handleCancel = () => {
     setShowModal(false);
     setTitle("");
     setDescription("");
+    setEditingTask(null);
+  };
+
+  const handleDelete = async (taskId) => {
+    const confirmed = window.confirm("Удалить задание?");
+    if (!confirmed) return;
+
+    const { error } = await supabase.from("tasks").delete().eq("id", taskId);
+
+    if (error) {
+      alert("Ошибка при удалении");
+    } else {
+      fetchTasks();
+    }
+  };
+
+  const handleEdit = (task) => {
+    setEditingTask(task);
+    setTitle(task.title);
+    setDescription(task.description);
+    setShowModal(true);
   };
 
   const handleLogout = async () => {
@@ -173,7 +215,9 @@ const Dashboard = () => {
         </div>
       )}
 
-        <button className="addButton" onClick={() => setShowModal(true)}></button>
+      <button className="addButton" onClick={() => setShowModal(true)}>
+        Добавить
+      </button>
 
       {/* Модальное окно */}
       {showModal && (
@@ -193,7 +237,7 @@ const Dashboard = () => {
             width: "300px",
             boxShadow: "0 4px 8px rgba(0,0,0,0.2)"
           }}>
-            <h3>Новое задание</h3>
+            <h3>{editingTask ? "Редактировать задание" : "Новое задание"}</h3>
             <input
               type="text"
               placeholder="Название"
@@ -208,7 +252,7 @@ const Dashboard = () => {
               style={{ width: "100%", marginBottom: "10px", padding: "5px" }}
             />
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <button onClick={handleConfirm}>Подтвердить</button>
+              <button onClick={handleConfirm}>Сохранить</button>
               <button onClick={handleCancel}>Отмена</button>
             </div>
           </div>
@@ -226,6 +270,10 @@ const Dashboard = () => {
               <small style={{ color: "#777" }}>
                 Добавлено: {new Date(task.created_at).toLocaleString()}
               </small>
+              <div style={{ marginTop: "10px" }}>
+                <button onClick={() => handleEdit(task)} style={{ marginRight: "10px" }}>Редактировать</button>
+                <button onClick={() => handleDelete(task.id)}>Удалить</button>
+              </div>
             </div>
           ))}
         </div>
