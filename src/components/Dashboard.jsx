@@ -9,6 +9,10 @@ const Dashboard = () => {
   const [activityByDay, setActivityByDay] = useState([]);
   const [motivationMessage, setMotivationMessage] = useState("");
 
+  // State for modal
+  const [showModal, setShowModal] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
 
   useEffect(() => {
     const analyzeActivity = () => {
@@ -23,12 +27,10 @@ const Dashboard = () => {
       } else {
         setMotivationMessage("Ты заходишь в систему регулярно. Молодец!");
       }
-      
     };
   
     analyzeActivity();
   }, [activityByDay]);
-
 
   useEffect(() => {
     const fetchLogins = async () => {
@@ -41,17 +43,12 @@ const Dashboard = () => {
   
         if (data) {
           const groupedByDay = data.reduce((acc, item) => {
-            // Преобразуем дату входа в объект Date
             const signInDate = new Date(item.sign_in_at);
-            // Приводим время в UTC и получаем день недели (0 - воскресенье, 1 - понедельник, и так далее)
             const dayOfWeek = signInDate.getUTCDay();
-            
-            // Считаем количество входов для каждого дня недели
             acc[dayOfWeek] = (acc[dayOfWeek] || 0) + 1;
             return acc;
           }, {});
   
-          // Преобразуем данные для отображения на графике
           const chartData = [
             { day: "Воскресенье", logins: groupedByDay[0] || 0 },
             { day: "Понедельник", logins: groupedByDay[1] || 0 },
@@ -69,8 +66,6 @@ const Dashboard = () => {
   
     fetchLogins();
   }, [user]);
-  
-
 
   useEffect(() => {
     const saveLogin = async () => {
@@ -81,14 +76,12 @@ const Dashboard = () => {
   
     saveLogin();
   }, [user]);
-  
 
-  
   useEffect(() => {
     const checkUser = async () => {
-      const { data, error } = await supabase.auth.getUser();
+      const { data } = await supabase.auth.getUser();
       if (!data?.user) {
-        navigate("/login"); // Если пользователь не авторизован, перенаправляем на login
+        navigate("/login");
       } else {
         setUser(data.user);
       }
@@ -97,10 +90,23 @@ const Dashboard = () => {
     checkUser();
   }, [navigate]);
 
-
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/login");
+  };
+
+  const handleConfirm = () => {
+    console.log("Название:", title);
+    console.log("Описание:", description);
+    setShowModal(false);
+    setTitle("");
+    setDescription("");
+  };
+
+  const handleCancel = () => {
+    setShowModal(false);
+    setTitle("");
+    setDescription("");
   };
 
   return (
@@ -123,9 +129,49 @@ const Dashboard = () => {
           <p style={{color: "#2196F3"}}>{motivationMessage}</p>
         </div>
       )}
-      <div className="addButton">
 
+      <div className="addButton">
+        <button onClick={() => setShowModal(true)}>Добавить</button>
       </div>
+
+      {showModal && (
+        <div style={{
+          position: "fixed",
+          top: 0, left: 0,
+          width: "100%", height: "100%",
+          backgroundColor: "rgba(0,0,0,0.5)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center"
+        }}>
+          <div style={{
+            backgroundColor: "#fff",
+            padding: "20px",
+            borderRadius: "8px",
+            width: "300px",
+            boxShadow: "0 4px 8px rgba(0,0,0,0.2)"
+          }}>
+            <h3>Новое задание</h3>
+            <input
+              type="text"
+              placeholder="Название"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              style={{ width: "100%", marginBottom: "10px", padding: "5px" }}
+            />
+            <textarea
+              placeholder="Описание"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              style={{ width: "100%", marginBottom: "10px", padding: "5px" }}
+            />
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <button onClick={handleConfirm}>Подтвердить</button>
+              <button onClick={handleCancel}>Отмена</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
