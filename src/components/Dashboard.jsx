@@ -95,13 +95,31 @@ const Dashboard = () => {
     navigate("/login");
   };
 
-  const handleConfirm = () => {
-    console.log("Название:", title);
-    console.log("Описание:", description);
-    setShowModal(false);
-    setTitle("");
-    setDescription("");
+  const handleConfirm = async () => {
+    if (!title.trim() || !description.trim()) {
+      alert("Заполни оба поля!");
+      return;
+    }
+  
+    const { error } = await supabase.from("tasks").insert([
+      {
+        user_id: user.id,
+        title,
+        description,
+      },
+    ]);
+  
+    if (error) {
+      console.error("Ошибка при сохранении:", error.message);
+      alert("Ошибка при сохранении");
+    } else {
+      alert("Задание успешно добавлено!");
+      setShowModal(false);
+      setTitle("");
+      setDescription("");
+    }
   };
+  
 
   const handleCancel = () => {
     setShowModal(false);
@@ -130,9 +148,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      <div className="addButton">
-        <button onClick={() => setShowModal(true)}>Добавить</button>
-      </div>
+      <button className="addButton" onClick={() => setShowModal(true)}>Добавить</button>
 
       {showModal && (
         <div style={{
