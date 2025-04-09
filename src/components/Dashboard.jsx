@@ -6,18 +6,20 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recha
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+
   const [activityByDay, setActivityByDay] = useState([]);
   const [motivationMessage, setMotivationMessage] = useState("");
 
-  // State for modal
   const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
+  const [tasks, setTasks] = useState([]);
+
   useEffect(() => {
     const analyzeActivity = () => {
       const activeWeekdays = activityByDay.filter((day) => day.logins > 0);
-  
+
       if (activeWeekdays.length === 0) {
         setMotivationMessage("Ты не заходил в систему несколько дней. Не забывай проверять обновления!");
       } else if (activeWeekdays.length === 7) {
@@ -28,7 +30,7 @@ const Dashboard = () => {
         setMotivationMessage("Ты заходишь в систему регулярно. Молодец!");
       }
     };
-  
+
     analyzeActivity();
   }, [activityByDay]);
 
@@ -40,7 +42,7 @@ const Dashboard = () => {
           .select("sign_in_at")
           .eq("user_id", user.id)
           .order("sign_in_at", { ascending: true });
-  
+
         if (data) {
           const groupedByDay = data.reduce((acc, item) => {
             const signInDate = new Date(item.sign_in_at);
@@ -48,7 +50,7 @@ const Dashboard = () => {
             acc[dayOfWeek] = (acc[dayOfWeek] || 0) + 1;
             return acc;
           }, {});
-  
+
           const chartData = [
             { day: "Воскресенье", logins: groupedByDay[0] || 0 },
             { day: "Понедельник", logins: groupedByDay[1] || 0 },
@@ -58,12 +60,12 @@ const Dashboard = () => {
             { day: "Пятница", logins: groupedByDay[5] || 0 },
             { day: "Суббота", logins: groupedByDay[6] || 0 },
           ];
-  
+
           setActivityByDay(chartData);
         }
       }
     };
-  
+
     fetchLogins();
   }, [user]);
 
@@ -73,7 +75,7 @@ const Dashboard = () => {
         await supabase.from("logins").insert([{ user_id: user.id }]);
       }
     };
-  
+
     saveLogin();
   }, [user]);
 
@@ -90,17 +92,35 @@ const Dashboard = () => {
     checkUser();
   }, [navigate]);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/login");
+  // Загрузка задач из Supabase
+  const fetchTasks = async () => {
+    if (user) {
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Ошибка при получении задач:", error.message);
+      } else {
+        setTasks(data);
+      }
+    }
   };
+
+  useEffect(() => {
+    if (user) {
+      fetchTasks();
+    }
+  }, [user]);
 
   const handleConfirm = async () => {
     if (!title.trim() || !description.trim()) {
       alert("Заполни оба поля!");
       return;
     }
-  
+
     const { error } = await supabase.from("tasks").insert([
       {
         user_id: user.id,
@@ -108,7 +128,7 @@ const Dashboard = () => {
         description,
       },
     ]);
-  
+
     if (error) {
       console.error("Ошибка при сохранении:", error.message);
       alert("Ошибка при сохранении");
@@ -117,14 +137,19 @@ const Dashboard = () => {
       setShowModal(false);
       setTitle("");
       setDescription("");
+      fetchTasks(); // Подгружаем задачи снова
     }
   };
-  
 
   const handleCancel = () => {
     setShowModal(false);
     setTitle("");
     setDescription("");
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/login");
   };
 
   return (
@@ -141,15 +166,18 @@ const Dashboard = () => {
           <Bar dataKey="logins" fill="#8884d8" />
         </BarChart>
       </ResponsiveContainer>
-      
+
       {motivationMessage && (
         <div className="motivation-message" style={{ color: "#2196F3", marginTop: "20px", padding: "30px", backgroundColor: "rgb(18 42 61)", borderRadius: "5px" }}>
-          <p style={{color: "#2196F3"}}>{motivationMessage}</p>
+          <p style={{ color: "#2196F3" }}>{motivationMessage}</p>
         </div>
       )}
 
-      <button className="addButton" onClick={() => setShowModal(true)}>Добавить</button>
+      <div className="addButton" style={{ marginTop: "20px" }}>
+        <button onClick={() => setShowModal(true)}>Добавить</button>
+      </div>
 
+      {/* Модальное окно */}
       {showModal && (
         <div style={{
           position: "fixed",
@@ -186,6 +214,22 @@ const Dashboard = () => {
               <button onClick={handleCancel}>Отмена</button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Список задач */}
+      {tasks.length > 0 && (
+        <div className="task-list" style={{ marginTop: "30px" }}>
+          <h3 style={{ marginBottom: "10px" }}>Твои задания:</h3>
+          {tasks.map((task) => (
+            <div key={task.id} style={{ backgroundColor: "#f2f2f2", padding: "10px", marginBottom: "10px", borderRadius: "5px" }}>
+              <strong>{task.title}</strong>
+              <p>{task.description}</p>
+              <small style={{ color: "#777" }}>
+                Добавлено: {new Date(task.created_at).toLocaleString()}
+              </small>
+            </div>
+          ))}
         </div>
       )}
     </div>
