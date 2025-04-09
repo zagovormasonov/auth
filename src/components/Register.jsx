@@ -24,7 +24,8 @@ const Register = () => {
   };
 
   return (
-    <div>
+    <div className="wrapper">
+      <h1>Viremo</h1>
       <h2>Регистрация</h2>
       <form onSubmit={handleRegister}>
         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
