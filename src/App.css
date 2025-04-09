@@ -40,10 +40,10 @@ img.userImg {
 .wrapper {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
   flex-wrap: wrap;
-  align-content: space-around;
+  justify-content: space-between;
+  align-items: flex-start;
+  align-content: center;
 }
 
 .recommend {
