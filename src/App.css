@@ -37,6 +37,15 @@ img.userImg {
   padding-right: 20px;
 }
 
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  align-content: space-around;
+}
+
 .recommend {
   padding: 10px;
   background-color: #EAF4FF;
