@@ -46,7 +46,7 @@ const Login = () => {
   return (
     <div className="wrapper">
       <h1>Viremo</h1>
-      <h2 className="text-4xl font-light flex-1/4 text-blue-500 mb-1">Вход</h2>
+      <h2 className="text-4xl font-light text-blue-500 mb-1">Вход</h2>
       <form className="p-3 flex-1/4" onSubmit={handleLogin}>
         <div>
           <input
