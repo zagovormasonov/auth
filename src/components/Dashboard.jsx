@@ -264,8 +264,8 @@ const Dashboard = () => {
         <div className="task-list" style={{ marginTop: "30px" }}>
           <h3 style={{ marginBottom: "10px" }}>Твои задания:</h3>
           {tasks.map((task) => (
-            <div key={task.id} style={{ backgroundColor: "black", padding: "10px", marginBottom: "10px", borderRadius: "5px" }}>
-              <strong>{task.title}</strong>
+            <div key={task.id} style={{ backgroundColor: "whitesmoke", padding: "10px", marginBottom: "10px", borderRadius: "5px" }}>
+              <strong style={{ color: "black" }}>{task.title}</strong>
               <p>{task.description}</p>
               <small style={{ color: "#777" }}>
                 Добавлено: {new Date(task.created_at).toLocaleString()}

@@ -14,6 +14,15 @@ img.userImg {
   height: 30px;
 }
 
+.profile_name {
+  color: black;
+}
+
+.layout {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
 .header_img {
   position: fixed;
   display: flex;
