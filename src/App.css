@@ -169,6 +169,7 @@ button {
   box-shadow: 0 40px 40px #3079fd66;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(10px);
+  cursor: pointer;
 }
 
 @media (prefers-reduced-motion: no-preference) {
