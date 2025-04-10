@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 import { useNavigate } from "react-router-dom";
+import coneImg from '../assets/cone.png';
 import {
   BarChart,
   Bar,
@@ -198,7 +199,7 @@ const Dashboard = () => {
     <div className="layout"> 
       <span className="profile_name">{user?.email}</span>
       <button onClick={handleLogout}>Выйти</button>
-      <img width={400} height={400} src="../assets/cone.png" alt=""/>
+      <img src={coneImg} alt="Cone"/>
       <p>Последний вход: {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "Нет данных"}</p>
 
       {/* <ResponsiveContainer width="100%" height={300}>
