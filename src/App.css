@@ -85,7 +85,7 @@ img.userImg {
   padding: 20px;
   border-radius: 8px;
   width: 300px;
-  color: white;
+  color: black;
 }
 .modal-content input, .modal-content textarea {
   width: 100%;
@@ -96,6 +96,7 @@ img.userImg {
   display: flex;
   justify-content: space-between;
   margin-top: 15px;
+  color: white;
 }
 .confirm-btn {
   background: #f44336;
