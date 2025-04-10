@@ -219,7 +219,9 @@ const Dashboard = () => {
         </div>
       )}
 
-      <button className="addButton" onClick={() => setShowModal(true)}>{plusImg}</button>
+      <button className="addButton" onClick={() => setShowModal(true)}>
+        <img src={plusImg} alt="plusImg" />
+      </button>
 
       {/* Модальное окно */}
       <AnimatePresence>
