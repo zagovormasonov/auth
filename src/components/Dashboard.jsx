@@ -6,6 +6,19 @@ import coneImg from '../assets/cone.png';
 import menuImg from '../assets/menu.png';
 import plusImg from '../assets/plus.svg';
 
+// Компонент уведомления
+const Notification = ({ message, type, onClose }) => (
+  <motion.div
+    initial={{ opacity: 0, y: -50 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -50 }}
+    className={`notification ${type}`}
+  >
+    {message}
+    <button onClick={onClose} className="close-btn">×</button>
+  </motion.div>
+);
+
 const TaskModal = ({ show, editingTask, title, description, setTitle, setDescription, onConfirm, onCancel }) => (
   <AnimatePresence>
     {show && (
@@ -52,6 +65,7 @@ const Dashboard = () => {
   const [description, setDescription] = useState("");
   const [editingTask, setEditingTask] = useState(null);
   const [openMenuTaskId, setOpenMenuTaskId] = useState(null);
+  const [notification, setNotification] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -79,16 +93,26 @@ const Dashboard = () => {
     setTasks(data || []);
   };
 
+  const showNotification = (message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
+
   const handleSaveTask = async () => {
-    if (!title.trim() || !description.trim()) return alert("Заполни оба поля!");
+    if (!title.trim() || !description.trim()) {
+      showNotification("Заполни оба поля!", "error");
+      return;
+    }
     
     const taskData = { title, description, user_id: user.id };
     const { error } = editingTask
       ? await supabase.from("tasks").update(taskData).eq("id", editingTask.id)
       : await supabase.from("tasks").insert([taskData]);
 
-    if (error) alert("Ошибка при сохранении");
-    else {
+    if (error) {
+      showNotification("Ошибка при сохранении", "error");
+    } else {
+      showNotification(editingTask ? "Задание обновлено!" : "Задание добавлено!");
       fetchTasks();
       setShowModal(false);
       setTitle("");
@@ -99,8 +123,14 @@ const Dashboard = () => {
 
   const handleDelete = async (taskId) => {
     if (!window.confirm("Удалить задание?")) return;
-    await supabase.from("tasks").delete().eq("id", taskId);
-    fetchTasks();
+    const { error } = await supabase.from("tasks").delete().eq("id", taskId);
+    
+    if (error) {
+      showNotification("Ошибка при удалении", "error");
+    } else {
+      showNotification("Задание удалено!");
+      fetchTasks();
+    }
   };
 
   const handleEdit = (task) => {
@@ -116,6 +146,16 @@ const Dashboard = () => {
         <span className="profile_name">{user?.email}</span>
         <button onClick={() => supabase.auth.signOut().then(() => navigate("/login"))}>Выйти</button>
       </div>
+
+      <AnimatePresence>
+        {notification && (
+          <Notification
+            message={notification.message}
+            type={notification.type}
+            onClose={() => setNotification(null)}
+          />
+        )}
+      </AnimatePresence>
 
       {tasks.length === 0 && (
         <div className="empty-state">

@@ -37,11 +37,34 @@ img.userImg {
   padding-right: 20px;
 }
 
-.layout { padding: 20px; }
+.layout { padding: 20px; position: relative; }
 .header { display: flex; justify-content: space-between; align-items: center; }
 .empty-state { text-align: center; margin: 20px 0; }
 .empty-state img { width: 150px; }
 .addButton { position: fixed; bottom: 20px; right: 20px; }
+
+/* Notification */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 15px 20px;
+  border-radius: 5px;
+  color: white;
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+}
+.notification.success { background: #4CAF50; }
+.notification.error { background: #f44336; }
+.close-btn {
+  margin-left: 15px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
 
 /* Modal */
 .modal-overlay {
@@ -60,7 +83,6 @@ img.userImg {
   padding: 20px;
   border-radius: 8px;
   width: 300px;
-  z-index: 9000;
 }
 .modal-content input, .modal-content textarea {
   width: 100%;
