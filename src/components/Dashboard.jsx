@@ -2,14 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 import { useNavigate } from "react-router-dom";
 import coneImg from '../assets/cone.png';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import menuImg from '../assets/menu.png';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -271,6 +264,7 @@ const Dashboard = () => {
           {tasks.map((task) => (
             <div key={task.id} style={{ backgroundColor: "white", padding: "10px", marginBottom: "10px", borderRadius: "5px" }}>
               <strong style={{ color: "black" }}>{task.title}</strong>
+              <img src={menuImg} alt="" />
               <p>{task.description}</p>
               <small style={{ color: "#777" }}>
                 Добавлено: {new Date(task.created_at).toLocaleString()}
