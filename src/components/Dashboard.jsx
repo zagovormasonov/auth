@@ -11,7 +11,7 @@ import coneImg from '../assets/cone.png';
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [activityByDay, setActivityByDay] = useState([]);
-  const [motivationMessage, setMotivationMessage] = useState("");
+  const [motivationMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
