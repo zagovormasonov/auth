@@ -3,6 +3,7 @@ import { supabase } from "../supabaseClient";
 import { useNavigate } from "react-router-dom";
 import coneImg from '../assets/cone.png';
 import menuImg from '../assets/menu.png';
+import plusImg from '../assets/plus.svg';
 import { motion, AnimatePresence } from "framer-motion";
 
 const Dashboard = () => {
@@ -218,7 +219,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      <button className="addButton" onClick={() => setShowModal(true)}></button>
+      <button className="addButton" onClick={() => setShowModal(true)}>{plusImg}</button>
 
       {/* Модальное окно */}
       <AnimatePresence>
