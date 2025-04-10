@@ -17,6 +17,7 @@ const Dashboard = () => {
 
   const [editingTask, setEditingTask] = useState(null);
   const [tasks, setTasks] = useState([]);
+
   const [openMenuTaskId, setOpenMenuTaskId] = useState(null);
 
   useEffect(() => {
@@ -36,6 +37,41 @@ const Dashboard = () => {
 
     analyzeActivity();
   }, [activityByDay]);
+
+  // useEffect(() => {
+  //   const fetchLogins = async () => {
+  //     if (user) {
+  //       const { data } = await supabase
+  //         .from("logins")
+  //         .select("sign_in_at")
+  //         .eq("user_id", user.id)
+  //         .order("sign_in_at", { ascending: true });
+
+  //       if (data) {
+  //         const groupedByDay = data.reduce((acc, item) => {
+  //           const signInDate = new Date(item.sign_in_at);
+  //           const dayOfWeek = signInDate.getUTCDay();
+  //           acc[dayOfWeek] = (acc[dayOfWeek] || 0) + 1;
+  //           return acc;
+  //         }, {});
+
+  //         const chartData = [
+  //           { day: "Воскресенье", logins: groupedByDay[0] || 0 },
+  //           { day: "Понедельник", logins: groupedByDay[1] || 0 },
+  //           { day: "Вторник", logins: groupedByDay[2] || 0 },
+  //           { day: "Среда", logins: groupedByDay[3] || 0 },
+  //           { day: "Четверг", logins: groupedByDay[4] || 0 },
+  //           { day: "Пятница", logins: groupedByDay[5] || 0 },
+  //           { day: "Суббота", logins: groupedByDay[6] || 0 },
+  //         ];
+
+  //         setActivityByDay(chartData);
+  //       }
+  //     }
+  //   };
+
+  //   fetchLogins();
+  // }, [user]);
 
   useEffect(() => {
     const saveLogin = async () => {
@@ -80,16 +116,6 @@ const Dashboard = () => {
     }
   }, [user]);
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (!e.target.closest(".menu")) {
-        setOpenMenuTaskId(null);
-      }
-    };
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
-
   const handleConfirm = async () => {
     if (!title.trim() || !description.trim()) {
       alert("Заполни оба поля!");
@@ -97,6 +123,7 @@ const Dashboard = () => {
     }
 
     if (editingTask) {
+      // Обновление задачи
       const { error } = await supabase
         .from("tasks")
         .update({ title, description })
@@ -108,6 +135,7 @@ const Dashboard = () => {
         alert("Задание обновлено!");
       }
     } else {
+      // Добавление новой задачи
       const { error } = await supabase.from("tasks").insert([
         {
           user_id: user.id,
@@ -155,7 +183,6 @@ const Dashboard = () => {
     setTitle(task.title);
     setDescription(task.description);
     setShowModal(true);
-    setOpenMenuTaskId(null);
   };
 
   const handleLogout = async () => {
@@ -164,18 +191,25 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="layout">
+    <div className="layout"> 
       <span className="profile_name">{user?.email}</span>
       <button onClick={handleLogout}>Выйти</button>
-
       {tasks.length === 0 && (
         <div>
           <img src={coneImg} alt="Cone" style={{ width: "150px", marginTop: "20px" }} />
           <p>У вас пока что нет заданий</p>
-        </div>
+        </div>  
       )}
-
       <p>Последний вход: {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "Нет данных"}</p>
+
+      {/* <ResponsiveContainer width="100%" height={300}>
+        <BarChart data={activityByDay}>
+          <XAxis dataKey="day" />
+          <YAxis />
+          <Tooltip />
+          <Bar dataKey="logins" fill="#8884d8" />
+        </BarChart>
+      </ResponsiveContainer> */}
 
       {motivationMessage && (
         <div className="motivation-message" style={{ color: "#2196F3", marginTop: "20px", padding: "30px", backgroundColor: "rgb(18 42 61)", borderRadius: "5px" }}>
@@ -185,6 +219,7 @@ const Dashboard = () => {
 
       <button className="addButton" onClick={() => setShowModal(true)}></button>
 
+      {/* Модальное окно */}
       {showModal && (
         <div style={{
           position: "fixed",
@@ -224,6 +259,7 @@ const Dashboard = () => {
         </div>
       )}
 
+      {/* Список задач */}
       {tasks.length > 0 && (
         <div className="task-list" style={{ marginTop: "30px" }}>
           <h3 style={{ marginBottom: "10px" }}>Твои задания:</h3>
@@ -231,15 +267,17 @@ const Dashboard = () => {
             <div key={task.id} style={{ backgroundColor: "white", padding: "10px", marginBottom: "10px", borderRadius: "5px", position: "relative" }}>
               <strong style={{ color: "black" }}>{task.title}</strong>
 
-              <img
-                src={menuImg}
-                alt="Меню"
-                style={{ cursor: "pointer", float: "right" }}
-                onClick={() => setOpenMenuTaskId(openMenuTaskId === task.id ? null : task.id)}
+              {/* Кнопка меню */}
+              <img 
+                src={menuImg} 
+                alt="Меню" 
+                style={{ cursor: "pointer", float: "right" }} 
+                onClick={() => setOpenMenuTaskId(openMenuTaskId === task.id ? null : task.id)} 
               />
 
+              {/* Выпадающее меню */}
               {openMenuTaskId === task.id && (
-                <div className="menu" style={{
+                <div style={{
                   position: "absolute",
                   top: "30px",
                   right: "10px",
@@ -264,6 +302,7 @@ const Dashboard = () => {
               </small>
             </div>
           ))}
+
         </div>
       )}
     </div>
