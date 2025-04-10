@@ -66,7 +66,7 @@ img.userImg {
   cursor: pointer;
 }
 
-/* Modal */
+/* Modal (shared styles) */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -77,19 +77,29 @@ img.userImg {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 999;
 }
 .modal-content {
   background: black;
   padding: 20px;
   border-radius: 8px;
   width: 300px;
+  color: white;
 }
 .modal-content input, .modal-content textarea {
   width: 100%;
   margin-bottom: 10px;
   padding: 5px;
 }
-.modal-buttons { display: flex; justify-content: space-between; }
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+.confirm-btn {
+  background: #f44336;
+  color: white;
+}
 
 /* Task Item */
 .task-item {

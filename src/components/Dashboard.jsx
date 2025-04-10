@@ -19,6 +19,24 @@ const Notification = ({ message, type, onClose }) => (
   </motion.div>
 );
 
+// Компонент подтверждения удаления
+const ConfirmDeleteModal = ({ show, onConfirm, onCancel }) => (
+  <AnimatePresence>
+    {show && (
+      <motion.div className="modal-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+        <motion.div className="modal-content" initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }}>
+          <h3>Удалить задание?</h3>
+          <p>Вы уверены, что хотите удалить это задание?</p>
+          <div className="modal-buttons">
+            <button onClick={onConfirm} className="confirm-btn">Да</button>
+            <button onClick={onCancel}>Нет</button>
+          </div>
+        </motion.div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
+
 const TaskModal = ({ show, editingTask, title, description, setTitle, setDescription, onConfirm, onCancel }) => (
   <AnimatePresence>
     {show && (
@@ -66,6 +84,8 @@ const Dashboard = () => {
   const [editingTask, setEditingTask] = useState(null);
   const [openMenuTaskId, setOpenMenuTaskId] = useState(null);
   const [notification, setNotification] = useState(null);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -121,9 +141,13 @@ const Dashboard = () => {
     }
   };
 
-  const handleDelete = async (taskId) => {
-    if (!window.confirm("Удалить задание?")) return;
-    const { error } = await supabase.from("tasks").delete().eq("id", taskId);
+  const handleDelete = (taskId) => {
+    setTaskToDelete(taskId);
+    setShowConfirmDelete(true);
+  };
+
+  const confirmDelete = async () => {
+    const { error } = await supabase.from("tasks").delete().eq("id", taskToDelete);
     
     if (error) {
       showNotification("Ошибка при удалении", "error");
@@ -131,6 +155,8 @@ const Dashboard = () => {
       showNotification("Задание удалено!");
       fetchTasks();
     }
+    setShowConfirmDelete(false);
+    setTaskToDelete(null);
   };
 
   const handleEdit = (task) => {
@@ -179,6 +205,12 @@ const Dashboard = () => {
         setDescription={setDescription}
         onConfirm={handleSaveTask}
         onCancel={() => setShowModal(false)}
+ungg    />
+
+      <ConfirmDeleteModal
+        show={showConfirmDelete}
+        onConfirm={confirmDelete}
+        onCancel={() => setShowConfirmDelete(false)}
       />
 
       {tasks.length > 0 && (
