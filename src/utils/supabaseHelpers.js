@@ -1,6 +1,6 @@
 // utils/supabaseHelpers.js
 
-import { supabase } from '../supabaseClient';
+import { supabase } from './supabaseClient';
 
 // Получить пользователя
 export const getCurrentUser = async () => {
