@@ -1,170 +1,149 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import coneImg from '../assets/cone.png';
 import menuImg from '../assets/menu.png';
 import plusImg from '../assets/plus.svg';
-
-const Notification = ({ message, type, onClose }) => (
-  <motion.div
-    initial={{ opacity: 0, y: -50 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: -50 }}
-    className={`notification ${type}`}
-  >
-    {message}
-    <button onClick={onClose} className="close-btn">×</button>
-  </motion.div>
-);
-
-const ConfirmDeleteModal = ({ show, onConfirm, onCancel }) => (
-  <AnimatePresence>
-    {show && (
-      <motion.div className="modal-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-        <motion.div className="modal-content" initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }}>
-          <h3>Удалить задание?</h3>
-          <p>Вы уверены, что хотите удалить это задание?</p>
-          <div className="modal-buttons">
-            <button onClick={onConfirm} className="confirm-btn">Да</button>
-            <button onClick={onCancel}>Нет</button>
-          </div>
-        </motion.div>
-      </motion.div>
-    )}
-  </AnimatePresence>
-);
-
-const TaskModal = ({ show, editingTask, title, description, setTitle, setDescription, onConfirm, onCancel }) => (
-  <AnimatePresence>
-    {show && (
-      <motion.div className="modal-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-        <motion.div className="modal-content" initial={{ scale: 0.8 }} animate={{ scale: 1 }} exit={{ scale: 0.8 }}>
-          <h3>{editingTask ? "Редактировать задание" : "Новое задание"}</h3>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Название" />
-          <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Описание" />
-          <div className="modal-buttons">
-            <button onClick={onConfirm}>Сохранить</button>
-            <button onClick={onCancel}>Отмена</button>
-          </div>
-        </motion.div>
-      </motion.div>
-    )}
-  </AnimatePresence>
-);
-
-const TaskItem = ({ task, onEdit, onDelete, openMenuTaskId, setOpenMenuTaskId }) => (
-  <div className="task-item">
-    <strong>{task.title}</strong>
-    <img 
-      src={menuImg} 
-      alt="Меню" 
-      className="menu-icon"
-      onClick={() => setOpenMenuTaskId(openMenuTaskId === task.id ? null : task.id)} 
-    />
-    {openMenuTaskId === task.id && (
-      <div className="task-menu">
-        <button onClick={() => onEdit(task)}>✏️ Редактировать</button>
-        <button onClick={() => onDelete(task.id)}>🗑️ Удалить</button>
-      </div>
-    )}
-    <p>{task.description}</p>
-    <small>Добавлено: {new Date(task.created_at).toLocaleString()}</small>
-  </div>
-);
+import { motion, AnimatePresence } from "framer-motion";
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
-  const [tasks, setTasks] = useState([]);
+  const navigate = useNavigate();
+
+  const [activityByDay, setActivityByDay] = useState([]);
+  const [motivationMessage, setMotivationMessage] = useState("");
+
   const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+
   const [editingTask, setEditingTask] = useState(null);
+  const [tasks, setTasks] = useState([]);
+
   const [openMenuTaskId, setOpenMenuTaskId] = useState(null);
-  const [notification, setNotification] = useState(null);
-  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-  const [taskToDelete, setTaskToDelete] = useState(null);
-  const [avatarUrl, setAvatarUrl] = useState(null);
-  const navigate = useNavigate();
+
+  useEffect(() => {
+    const analyzeActivity = () => {
+      const activeWeekdays = activityByDay.filter((day) => day.logins > 0);
+
+      if (activeWeekdays.length === 0) {
+        setMotivationMessage("Ты не заходил в систему несколько дней. Не забывай проверять обновления!");
+      } else if (activeWeekdays.length === 7) {
+        setMotivationMessage("Ты активен каждый день! Отличная регулярность!");
+      } else if (activeWeekdays.every((day) => day.day === "Воскресенье" || day.day === "Суббота")) {
+        setMotivationMessage("Ты зашел только в выходные. Попробуй быть активнее в будние дни!");
+      } else {
+        setMotivationMessage("Ты заходишь в систему регулярно. Молодец!");
+      }
+    };
+
+    analyzeActivity();
+  }, [activityByDay]);
+
+
+  useEffect(() => {
+    const saveLogin = async () => {
+      if (user) {
+        await supabase.from("logins").insert([{ user_id: user.id }]);
+      }
+    };
+
+    saveLogin();
+  }, [user]);
 
   useEffect(() => {
     const checkUser = async () => {
       const { data } = await supabase.auth.getUser();
-      if (!data?.user) navigate("/login");
-      else setUser(data.user);
+      if (!data?.user) {
+        navigate("/login");
+      } else {
+        setUser(data.user);
+      }
     };
+
     checkUser();
   }, [navigate]);
 
+  const fetchTasks = async () => {
+    if (user) {
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (!error) {
+        setTasks(data);
+      }
+    }
+  };
+
   useEffect(() => {
     if (user) {
-      supabase.from("logins").insert([{ user_id: user.id }]);
       fetchTasks();
-      fetchProfile();
     }
   }, [user]);
 
-  const fetchTasks = async () => {
-    const { data } = await supabase
-      .from("tasks")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-    setTasks(data || []);
-  };
-
-  const fetchProfile = async () => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("avatar_url")
-      .eq("id", user.id)
-      .single();
-    setAvatarUrl(data?.avatar_url || null);
-  };
-
-  const showNotification = (message, type = 'success') => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
-
-  const handleSaveTask = async () => {
+  const handleConfirm = async () => {
     if (!title.trim() || !description.trim()) {
-      showNotification("Заполни оба поля!", "error");
+      alert("Заполни оба поля!");
       return;
     }
 
-    const taskData = { title, description, user_id: user.id };
-    const { error } = editingTask
-      ? await supabase.from("tasks").update(taskData).eq("id", editingTask.id)
-      : await supabase.from("tasks").insert([taskData]);
+    if (editingTask) {
+      // Обновление задачи
+      const { error } = await supabase
+        .from("tasks")
+        .update({ title, description })
+        .eq("id", editingTask.id);
 
-    if (error) {
-      showNotification("Ошибка при сохранении", "error");
+      if (error) {
+        alert("Ошибка при редактировании");
+      } else {
+        alert("Задание обновлено!");
+      }
     } else {
-      showNotification(editingTask ? "Задание обновлено!" : "Задание добавлено!");
-      fetchTasks();
-      setShowModal(false);
-      setTitle("");
-      setDescription("");
-      setEditingTask(null);
+      // Добавление новой задачи
+      const { error } = await supabase.from("tasks").insert([
+        {
+          user_id: user.id,
+          title,
+          description,
+        },
+      ]);
+
+      if (error) {
+        alert("Ошибка при сохранении");
+      } else {
+        alert("Задание успешно добавлено!");
+      }
     }
+
+    setShowModal(false);
+    setTitle("");
+    setDescription("");
+    setEditingTask(null);
+    fetchTasks();
   };
 
-  const handleDelete = (taskId) => {
-    setTaskToDelete(taskId);
-    setShowConfirmDelete(true);
+  const handleCancel = () => {
+    setShowModal(false);
+    setTitle("");
+    setDescription("");
+    setEditingTask(null);
   };
 
-  const confirmDelete = async () => {
-    const { error } = await supabase.from("tasks").delete().eq("id", taskToDelete);
+  const handleDelete = async (taskId) => {
+    const confirmed = window.confirm("Удалить задание?");
+    if (!confirmed) return;
+
+    const { error } = await supabase.from("tasks").delete().eq("id", taskId);
+
     if (error) {
-      showNotification("Ошибка при удалении", "error");
+      alert("Ошибка при удалении");
     } else {
-      showNotification("Задание удалено!");
       fetchTasks();
     }
-    setShowConfirmDelete(false);
-    setTaskToDelete(null);
   };
 
   const handleEdit = (task) => {
@@ -174,123 +153,142 @@ const Dashboard = () => {
     setShowModal(true);
   };
 
-  const handleAvatarUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const filePath = `${user.id}/${Date.now()}-${file.name}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("avatars")
-      .upload(filePath, file, { upsert: true });
-
-    if (uploadError) {
-      showNotification("Ошибка при загрузке аватара", "error");
-      return;
-    }
-
-    const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
-    const publicUrl = data.publicUrl;
-
-    const { error: updateError } = await supabase
-      .from("profiles")
-      .upsert({ id: user.id, avatar_url: publicUrl });
-
-    if (updateError) {
-      showNotification("Ошибка при сохранении URL", "error");
-      return;
-    }
-
-    showNotification("Аватар обновлён!");
-    setAvatarUrl(publicUrl);
-  };
-
-  const handleAvatarDelete = async () => {
-    const fileName = avatarUrl?.split("/").pop();
-    const folder = avatarUrl?.split("/").slice(-2, -1)[0];
-    const filePath = `${folder}/${fileName}`;
-
-    await supabase.storage.from("avatars").remove([filePath]);
-
-    await supabase.from("profiles").update({ avatar_url: null }).eq("id", user.id);
-
-    setAvatarUrl(null);
-    showNotification("Аватар удалён");
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/login");
   };
 
   return (
-    <div className="layout">
-      <div className="header">
-        <div className="avatar-section">
-          {avatarUrl ? (
-            <>
-              <img src={avatarUrl} alt="avatar" className="avatar" />
-              <button onClick={handleAvatarDelete}>Удалить аватар</button>
-            </>
-          ) : (
-            <>
-              <input type="file" onChange={handleAvatarUpload} />
-            </>
-          )}
-        </div>
-
-        <span className="profile_name">{user?.email}</span>
-        <button onClick={() => supabase.auth.signOut().then(() => navigate("/login"))}>Выйти</button>
-      </div>
-
-      <AnimatePresence>
-        {notification && (
-          <Notification
-            message={notification.message}
-            type={notification.type}
-            onClose={() => setNotification(null)}
-          />
-        )}
-      </AnimatePresence>
-
+    <div className="layout"> 
+      <span className="profile_name">{user?.email}</span>
+      <button onClick={handleLogout}>Выйти</button>
       {tasks.length === 0 && (
-        <div className="empty-state">
-          <img src={coneImg} alt="Cone" />
+        <div>
+          <img src={coneImg} alt="Cone" style={{ width: "150px", marginTop: "20px" }} />
           <p>У вас пока что нет заданий</p>
+        </div>  
+      )}
+      <p>Последний вход: {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "Нет данных"}</p>
+
+      {/* <ResponsiveContainer width="100%" height={300}>
+        <BarChart data={activityByDay}>
+          <XAxis dataKey="day" />
+          <YAxis />
+          <Tooltip />
+          <Bar dataKey="logins" fill="#8884d8" />
+        </BarChart>
+      </ResponsiveContainer> */}
+
+      {motivationMessage && (
+        <div className="motivation-message" style={{ color: "#2196F3", marginTop: "20px", padding: "30px", backgroundColor: "rgb(18 42 61)", borderRadius: "5px" }}>
+          <p style={{ color: "#2196F3" }}>{motivationMessage}</p>
         </div>
       )}
 
-      <p>Последний вход: {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "Нет данных"}</p>
-
       <button className="addButton" onClick={() => setShowModal(true)}>
-        <img src={plusImg} alt="plus" />
+        <img src={plusImg} alt="plusImg" />
       </button>
 
-      <TaskModal
-        show={showModal}
-        editingTask={editingTask}
-        title={title}
-        description={description}
-        setTitle={setTitle}
-        setDescription={setDescription}
-        onConfirm={handleSaveTask}
-        onCancel={() => setShowModal(false)}
-      />
+      {/* Модальное окно */}
+      <AnimatePresence>
+        {showModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              position: "fixed",
+              top: 0, left: 0,
+              width: "100%", height: "100%",
+              backgroundColor: "rgba(0,0,0,0.5)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 9999
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              style={{
+                backgroundColor: "black",
+                padding: "20px",
+                borderRadius: "8px",
+                width: "300px",
+                boxShadow: "0 4px 8px rgba(0,0,0,0.2)"
+              }}
+            >
+              <h3>{editingTask ? "Редактировать задание" : "Новое задание"}</h3>
+              <input
+                type="text"
+                placeholder="Название"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                style={{ width: "100%", marginBottom: "10px", padding: "5px" }}
+              />
+              <textarea
+                placeholder="Описание"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                style={{ width: "100%", marginBottom: "10px", padding: "5px" }}
+              />
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <button onClick={handleConfirm}>Сохранить</button>
+                <button onClick={handleCancel}>Отмена</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      <ConfirmDeleteModal
-        show={showConfirmDelete}
-        onConfirm={confirmDelete}
-        onCancel={() => setShowConfirmDelete(false)}
-      />
 
+      {/* Список задач */}
       {tasks.length > 0 && (
-        <div className="task-list">
-          <h3>Твои задания:</h3>
+        <div className="task-list" style={{ marginTop: "30px" }}>
+          <h3 style={{ marginBottom: "10px" }}>Твои задания:</h3>
           {tasks.map((task) => (
-            <TaskItem
-              key={task.id}
-              task={task}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              openMenuTaskId={openMenuTaskId}
-              setOpenMenuTaskId={setOpenMenuTaskId}
-            />
+            <div key={task.id} style={{ backgroundColor: "white", padding: "10px", marginBottom: "10px", borderRadius: "5px", position: "relative" }}>
+              <strong style={{ color: "black" }}>{task.title}</strong>
+
+              {/* Кнопка меню */}
+              <img 
+                src={menuImg} 
+                alt="Меню" 
+                style={{ cursor: "pointer", float: "right" }} 
+                onClick={() => setOpenMenuTaskId(openMenuTaskId === task.id ? null : task.id)} 
+              />
+
+              {/* Выпадающее меню */}
+              {openMenuTaskId === task.id && (
+                <div style={{
+                  position: "absolute",
+                  top: "30px",
+                  right: "10px",
+                  backgroundColor: "#222",
+                  padding: "10px",
+                  borderRadius: "5px",
+                  zIndex: 1,
+                  boxShadow: "0 2px 10px rgba(0,0,0,0.2)"
+                }}>
+                  <button onClick={() => handleEdit(task)} style={{ display: "block", marginBottom: "5px", width: "100%" }}>
+                    ✏️ Редактировать
+                  </button>
+                  <button onClick={() => handleDelete(task.id)} style={{ display: "block", width: "100%" }}>
+                    🗑️ Удалить
+                  </button>
+                </div>
+              )}
+
+              <p>{task.description}</p>
+              <small style={{ color: "#777" }}>
+                Добавлено: {new Date(task.created_at).toLocaleString()}
+              </small>
+            </div>
           ))}
+
         </div>
       )}
     </div>
