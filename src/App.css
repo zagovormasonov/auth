@@ -73,18 +73,19 @@ img.userImg {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(50px);
+  -webkit-backdrop-filter: blur(50px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 999;
 }
 .modal-content {
-  background: black;
+  background: rgb(255, 255, 255);
   padding: 20px;
   border-radius: 8px;
   width: 300px;
-  color: white;
+  color: black;
 }
 .modal-content input, .modal-content textarea {
   width: 100%;
