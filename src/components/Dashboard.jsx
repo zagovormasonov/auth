@@ -198,17 +198,17 @@ const Dashboard = () => {
     <div className="layout">
       <span className="profile_name">{user?.email}</span>
       <button onClick={handleLogout}>Выйти</button>
-      <img src="./assets/cone.png" alt=""/>
+      <img src="../assets/cone.png" alt=""/>
       <p>Последний вход: {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "Нет данных"}</p>
 
-      <ResponsiveContainer width="100%" height={300}>
+      {/* <ResponsiveContainer width="100%" height={300}>
         <BarChart data={activityByDay}>
           <XAxis dataKey="day" />
           <YAxis />
           <Tooltip />
           <Bar dataKey="logins" fill="#8884d8" />
         </BarChart>
-      </ResponsiveContainer>
+      </ResponsiveContainer> */}
 
       {motivationMessage && (
         <div className="motivation-message" style={{ color: "#2196F3", marginTop: "20px", padding: "30px", backgroundColor: "rgb(18 42 61)", borderRadius: "5px" }}>
