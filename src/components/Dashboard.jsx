@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 import { useNavigate } from "react-router-dom";
-import { getActivityMessage } from "../utils/activityAnalyzer";
+import ActivityAnalyzer from "./ActivityAnalyzer";
 import { fetchLogins, saveLogin, fetchTasks as getTasks } from "../utils/supabaseHelpers";
 import TaskCard from "../components/TaskCard";
 import Modal from "../components/Modal";
@@ -20,9 +20,8 @@ const Dashboard = () => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    setMotivationMessage(getActivityMessage(activityByDay));
-  }, [activityByDay]);
+  <ActivityAnalyzer activityByDay={activityByDay} />
+
 
   useEffect(() => {
     const checkUser = async () => {
