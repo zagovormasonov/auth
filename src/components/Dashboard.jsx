@@ -42,40 +42,40 @@ const Dashboard = () => {
     analyzeActivity();
   }, [activityByDay]);
 
-  useEffect(() => {
-    const fetchLogins = async () => {
-      if (user) {
-        const { data } = await supabase
-          .from("logins")
-          .select("sign_in_at")
-          .eq("user_id", user.id)
-          .order("sign_in_at", { ascending: true });
+  // useEffect(() => {
+  //   const fetchLogins = async () => {
+  //     if (user) {
+  //       const { data } = await supabase
+  //         .from("logins")
+  //         .select("sign_in_at")
+  //         .eq("user_id", user.id)
+  //         .order("sign_in_at", { ascending: true });
 
-        if (data) {
-          const groupedByDay = data.reduce((acc, item) => {
-            const signInDate = new Date(item.sign_in_at);
-            const dayOfWeek = signInDate.getUTCDay();
-            acc[dayOfWeek] = (acc[dayOfWeek] || 0) + 1;
-            return acc;
-          }, {});
+  //       if (data) {
+  //         const groupedByDay = data.reduce((acc, item) => {
+  //           const signInDate = new Date(item.sign_in_at);
+  //           const dayOfWeek = signInDate.getUTCDay();
+  //           acc[dayOfWeek] = (acc[dayOfWeek] || 0) + 1;
+  //           return acc;
+  //         }, {});
 
-          const chartData = [
-            { day: "Воскресенье", logins: groupedByDay[0] || 0 },
-            { day: "Понедельник", logins: groupedByDay[1] || 0 },
-            { day: "Вторник", logins: groupedByDay[2] || 0 },
-            { day: "Среда", logins: groupedByDay[3] || 0 },
-            { day: "Четверг", logins: groupedByDay[4] || 0 },
-            { day: "Пятница", logins: groupedByDay[5] || 0 },
-            { day: "Суббота", logins: groupedByDay[6] || 0 },
-          ];
+  //         const chartData = [
+  //           { day: "Воскресенье", logins: groupedByDay[0] || 0 },
+  //           { day: "Понедельник", logins: groupedByDay[1] || 0 },
+  //           { day: "Вторник", logins: groupedByDay[2] || 0 },
+  //           { day: "Среда", logins: groupedByDay[3] || 0 },
+  //           { day: "Четверг", logins: groupedByDay[4] || 0 },
+  //           { day: "Пятница", logins: groupedByDay[5] || 0 },
+  //           { day: "Суббота", logins: groupedByDay[6] || 0 },
+  //         ];
 
-          setActivityByDay(chartData);
-        }
-      }
-    };
+  //         setActivityByDay(chartData);
+  //       }
+  //     }
+  //   };
 
-    fetchLogins();
-  }, [user]);
+  //   fetchLogins();
+  // }, [user]);
 
   useEffect(() => {
     const saveLogin = async () => {
@@ -198,6 +198,7 @@ const Dashboard = () => {
     <div className="layout">
       <span className="profile_name">{user?.email}</span>
       <button onClick={handleLogout}>Выйти</button>
+      <img src="./assets/cone.png" alt=""/>
       <p>Последний вход: {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "Нет данных"}</p>
 
       <ResponsiveContainer width="100%" height={300}>
