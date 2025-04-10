@@ -165,7 +165,7 @@ button {
   bottom: 20px;
   background: #ffffff5e;
   border-radius: 100px;
-  box-shadow: 0 4px 30px #0000001a;
+  box-shadow: 0 40px 40px #3079fd66;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(10px);
 }
