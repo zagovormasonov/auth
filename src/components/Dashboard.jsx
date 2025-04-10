@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import coneImg from "../assets/cone.png";
-import menuImg from "../assets/menu.png";
-import plusImg from "../assets/plus.svg";
+import coneImg from '../assets/cone.png';
+import menuImg from '../assets/menu.png';
+import plusImg from '../assets/plus.svg';
 
-// Компонент уведомления
 const Notification = ({ message, type, onClose }) => (
   <motion.div
     initial={{ opacity: 0, y: -50 }}
@@ -19,7 +18,6 @@ const Notification = ({ message, type, onClose }) => (
   </motion.div>
 );
 
-// Компонент подтверждения удаления
 const ConfirmDeleteModal = ({ show, onConfirm, onCancel }) => (
   <AnimatePresence>
     {show && (
@@ -37,7 +35,6 @@ const ConfirmDeleteModal = ({ show, onConfirm, onCancel }) => (
   </AnimatePresence>
 );
 
-// Модалка задания
 const TaskModal = ({ show, editingTask, title, description, setTitle, setDescription, onConfirm, onCancel }) => (
   <AnimatePresence>
     {show && (
@@ -59,11 +56,11 @@ const TaskModal = ({ show, editingTask, title, description, setTitle, setDescrip
 const TaskItem = ({ task, onEdit, onDelete, openMenuTaskId, setOpenMenuTaskId }) => (
   <div className="task-item">
     <strong>{task.title}</strong>
-    <img
-      src={menuImg}
-      alt="Меню"
+    <img 
+      src={menuImg} 
+      alt="Меню" 
       className="menu-icon"
-      onClick={() => setOpenMenuTaskId(openMenuTaskId === task.id ? null : task.id)}
+      onClick={() => setOpenMenuTaskId(openMenuTaskId === task.id ? null : task.id)} 
     />
     {openMenuTaskId === task.id && (
       <div className="task-menu">
@@ -88,7 +85,6 @@ const Dashboard = () => {
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState(null);
   const [avatarUrl, setAvatarUrl] = useState(null);
-  const [uploading, setUploading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -104,7 +100,7 @@ const Dashboard = () => {
     if (user) {
       supabase.from("logins").insert([{ user_id: user.id }]);
       fetchTasks();
-      fetchAvatar();
+      fetchProfile();
     }
   }, [user]);
 
@@ -117,73 +113,16 @@ const Dashboard = () => {
     setTasks(data || []);
   };
 
-  const fetchAvatar = async () => {
+  const fetchProfile = async () => {
     const { data } = await supabase
       .from("profiles")
       .select("avatar_url")
       .eq("id", user.id)
       .single();
-
-    if (data?.avatar_url) setAvatarUrl(data.avatar_url);
+    setAvatarUrl(data?.avatar_url || null);
   };
 
-  const uploadAvatar = async (event) => {
-    try {
-      setUploading(true);
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${user.id}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(filePath);
-
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .upsert({ id: user.id, avatar_url: publicUrl });
-
-      if (updateError) throw updateError;
-
-      setAvatarUrl(publicUrl);
-      showNotification("Аватар обновлён!");
-    } catch (error) {
-      console.error(error);
-      showNotification("Ошибка при загрузке аватара", "error");
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const deleteAvatar = async () => {
-    try {
-      const fileName = avatarUrl?.split("/").pop();
-      if (!fileName) return;
-
-      await supabase.storage.from("avatars").remove([fileName]);
-
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ avatar_url: null })
-        .eq("id", user.id);
-
-      if (updateError) throw updateError;
-
-      setAvatarUrl(null);
-      showNotification("Аватар удалён!");
-    } catch (error) {
-      console.error(error);
-      showNotification("Ошибка при удалении аватара", "error");
-    }
-  };
-
-  const showNotification = (message, type = "success") => {
+  const showNotification = (message, type = 'success') => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);
   };
@@ -218,7 +157,6 @@ const Dashboard = () => {
 
   const confirmDelete = async () => {
     const { error } = await supabase.from("tasks").delete().eq("id", taskToDelete);
-
     if (error) {
       showNotification("Ошибка при удалении", "error");
     } else {
@@ -236,28 +174,68 @@ const Dashboard = () => {
     setShowModal(true);
   };
 
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const filePath = `${user.id}/${Date.now()}-${file.name}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      showNotification("Ошибка при загрузке аватара", "error");
+      return;
+    }
+
+    const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
+    const publicUrl = data.publicUrl;
+
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .upsert({ id: user.id, avatar_url: publicUrl });
+
+    if (updateError) {
+      showNotification("Ошибка при сохранении URL", "error");
+      return;
+    }
+
+    showNotification("Аватар обновлён!");
+    setAvatarUrl(publicUrl);
+  };
+
+  const handleAvatarDelete = async () => {
+    const fileName = avatarUrl?.split("/").pop();
+    const folder = avatarUrl?.split("/").slice(-2, -1)[0];
+    const filePath = `${folder}/${fileName}`;
+
+    await supabase.storage.from("avatars").remove([filePath]);
+
+    await supabase.from("profiles").update({ avatar_url: null }).eq("id", user.id);
+
+    setAvatarUrl(null);
+    showNotification("Аватар удалён");
+  };
+
   return (
     <div className="layout">
       <div className="header">
+        <div className="avatar-section">
+          {avatarUrl ? (
+            <>
+              <img src={avatarUrl} alt="avatar" className="avatar" />
+              <button onClick={handleAvatarDelete}>Удалить аватар</button>
+            </>
+          ) : (
+            <>
+              <input type="file" onChange={handleAvatarUpload} />
+            </>
+          )}
+        </div>
+
         <span className="profile_name">{user?.email}</span>
         <button onClick={() => supabase.auth.signOut().then(() => navigate("/login"))}>Выйти</button>
-      </div>
-
-      <div className="avatar-section">
-        {avatarUrl ? (
-          <div className="avatar-container">
-            <img src={avatarUrl} alt="Аватар" className="avatar-img" />
-            <button onClick={deleteAvatar}>Удалить аватар</button>
-          </div>
-        ) : (
-          <div>
-            <label className="upload-label">
-              Загрузить аватар
-              <input type="file" accept="image/*" onChange={uploadAvatar} hidden />
-            </label>
-          </div>
-        )}
-        {uploading && <p>Загрузка...</p>}
       </div>
 
       <AnimatePresence>
