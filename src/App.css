@@ -116,6 +116,14 @@ form {
   border-radius: 20px;
 }
 
+p {
+  color: rgb(80, 80, 80);
+}
+
+a {
+  color: #2b7fff;
+}
+
 input[type="email"] {
   border: 1px solid #dadada;
   padding: 10px 20px;
