@@ -159,6 +159,7 @@ button {
 
 .addButton {
   width: 64px;
+  z-index: 9999;
   height: 64px;
   position: fixed;
   right: 20px;
