@@ -228,7 +228,8 @@ const Dashboard = () => {
           backgroundColor: "rgba(0,0,0,0.5)",
           display: "flex",
           justifyContent: "center",
-          alignItems: "center"
+          alignItems: "center",
+          zIndex: 9999, // ← Добавь это
         }}>
           <div style={{
             backgroundColor: "black",
