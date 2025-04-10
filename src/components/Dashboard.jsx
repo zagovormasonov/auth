@@ -200,7 +200,10 @@ const Dashboard = () => {
       <span className="profile_name">{user?.email}</span>
       <button onClick={handleLogout}>Выйти</button>
       {tasks.length === 0 && (
-        <img src={coneImg} alt="Cone" style={{ width: "150px", marginTop: "20px" }} />
+        <div>
+          <img src={coneImg} alt="Cone" style={{ width: "150px", marginTop: "20px" }} />
+          <p>У вас пока что нет заданий</p>
+        </div>  
       )}
       <p>Последний вход: {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "Нет данных"}</p>
 
