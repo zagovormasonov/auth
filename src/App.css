@@ -120,6 +120,7 @@ input[type="email"] {
   border: 1px solid #dadada;
   padding: 10px 20px;
   border-radius: 10px;
+  color: black;
 }
 
 input[type="password"] {
@@ -127,6 +128,7 @@ input[type="password"] {
   padding: 10px 20px;
   border-radius: 10px;
   margin-top: 10px;
+  color: black;
 }
 
 button {
