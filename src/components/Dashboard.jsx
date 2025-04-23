@@ -16,6 +16,7 @@ const Dashboard = () => {
   const [showModal, setShowModal] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [modalStep, setModalStep] = useState(1);
 
   const [editingTask, setEditingTask] = useState(null);
   const [tasks, setTasks] = useState([]);
@@ -39,7 +40,6 @@ const Dashboard = () => {
 
     analyzeActivity();
   }, [activityByDay]);
-
 
   useEffect(() => {
     const saveLogin = async () => {
@@ -91,7 +91,6 @@ const Dashboard = () => {
     }
 
     if (editingTask) {
-      // Обновление задачи
       const { error } = await supabase
         .from("tasks")
         .update({ title, description })
@@ -103,7 +102,6 @@ const Dashboard = () => {
         alert("Задание обновлено!");
       }
     } else {
-      // Добавление новой задачи
       const { error } = await supabase.from("tasks").insert([
         {
           user_id: user.id,
@@ -119,10 +117,7 @@ const Dashboard = () => {
       }
     }
 
-    setShowModal(false);
-    setTitle("");
-    setDescription("");
-    setEditingTask(null);
+    handleCancel();
     fetchTasks();
   };
 
@@ -131,6 +126,7 @@ const Dashboard = () => {
     setTitle("");
     setDescription("");
     setEditingTask(null);
+    setModalStep(1);
   };
 
   const handleDelete = async (taskId) => {
@@ -151,6 +147,7 @@ const Dashboard = () => {
     setTitle(task.title);
     setDescription(task.description);
     setShowModal(true);
+    setModalStep(1);
   };
 
   const handleLogout = async () => {
@@ -159,25 +156,18 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="layout"> 
+    <div className="layout">
       <span className="profile_name">{user?.email}</span>
       <button onClick={handleLogout}>Выйти</button>
+
       {tasks.length === 0 && (
         <div>
           <img src={coneImg} alt="Cone" style={{ width: "150px", marginTop: "20px" }} />
           <p>У вас пока что нет заданий</p>
-        </div>  
+        </div>
       )}
-      <p>Последний вход: {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "Нет данных"}</p>
 
-      {/* <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={activityByDay}>
-          <XAxis dataKey="day" />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="logins" fill="#8884d8" />
-        </BarChart>
-      </ResponsiveContainer> */}
+      <p>Последний вход: {user?.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "Нет данных"}</p>
 
       {motivationMessage && (
         <div className="motivation-message" style={{ color: "#2196F3", marginTop: "20px", padding: "30px", backgroundColor: "rgb(18 42 61)", borderRadius: "5px" }}>
@@ -189,7 +179,6 @@ const Dashboard = () => {
         <img src={plusImg} alt="plusImg" />
       </button>
 
-      {/* Модальное окно */}
       <AnimatePresence>
         {showModal && (
           <motion.div
@@ -199,8 +188,10 @@ const Dashboard = () => {
             transition={{ duration: 0.2 }}
             style={{
               position: "fixed",
-              top: 0, left: 0,
-              width: "100%", height: "100%",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
               backgroundColor: "rgba(0,0,0,0.5)",
               display: "flex",
               justifyContent: "center",
@@ -222,30 +213,60 @@ const Dashboard = () => {
               }}
             >
               <h3>{editingTask ? "Редактировать задание" : "Новое задание"}</h3>
-              <input
-                type="text"
-                placeholder="Название"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                style={{ width: "100%", marginBottom: "10px", padding: "5px" }}
-              />
-              <textarea
-                placeholder="Описание"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                style={{ width: "100%", marginBottom: "10px", padding: "5px" }}
-              />
+
+              {modalStep === 1 && (
+                <input
+                  type="text"
+                  placeholder="Название"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  style={{ width: "100%", marginBottom: "10px", padding: "5px" }}
+                />
+              )}
+
+              {modalStep === 2 && (
+                <textarea
+                  placeholder="Описание"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  style={{ width: "100%", marginBottom: "10px", padding: "5px" }}
+                />
+              )}
+
               <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <button onClick={handleConfirm}>Сохранить</button>
-                <button onClick={handleCancel}>Отмена</button>
+                {modalStep > 1 ? (
+                  <button onClick={() => setModalStep((s) => s - 1)}>Назад</button>
+                ) : (
+                  <div />
+                )}
+
+                {modalStep < 2 ? (
+                  <button
+                    onClick={() => {
+                      if (!title.trim()) {
+                        alert("Введите название!");
+                      } else {
+                        setModalStep((s) => s + 1);
+                      }
+                    }}
+                  >
+                    Далее
+                  </button>
+                ) : (
+                  <button onClick={handleConfirm}>Сохранить</button>
+                )}
+              </div>
+
+              <div style={{ marginTop: "10px" }}>
+                <button onClick={handleCancel} style={{ width: "100%", marginTop: "10px" }}>
+                  Отмена
+                </button>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-
-      {/* Список задач */}
       {tasks.length > 0 && (
         <div className="task-list" style={{ marginTop: "30px" }}>
           <h3 style={{ marginBottom: "10px" }}>Твои задания:</h3>
@@ -253,15 +274,13 @@ const Dashboard = () => {
             <div key={task.id} style={{ backgroundColor: "white", padding: "10px", marginBottom: "10px", borderRadius: "5px", position: "relative" }}>
               <strong style={{ color: "black" }}>{task.title}</strong>
 
-              {/* Кнопка меню */}
-              <img 
-                src={menuImg} 
-                alt="Меню" 
-                style={{ cursor: "pointer", float: "right" }} 
-                onClick={() => setOpenMenuTaskId(openMenuTaskId === task.id ? null : task.id)} 
+              <img
+                src={menuImg}
+                alt="Меню"
+                style={{ cursor: "pointer", float: "right" }}
+                onClick={() => setOpenMenuTaskId(openMenuTaskId === task.id ? null : task.id)}
               />
 
-              {/* Выпадающее меню */}
               {openMenuTaskId === task.id && (
                 <div style={{
                   position: "absolute",
@@ -288,7 +307,6 @@ const Dashboard = () => {
               </small>
             </div>
           ))}
-
         </div>
       )}
     </div>
